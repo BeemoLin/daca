@@ -3,8 +3,7 @@
 
 #define tagLabelCoin 1234
 #define tagEqItem 5555
-#define eq1 555
-#define eq2 554
+#define tagPlugItem 6666
 
 #include "cocos2d.h"
 
@@ -20,7 +19,12 @@ class HelloWorld : public cocos2d::Layer
 	public:
 		int score;
 		int eq;
+		int plug;
+		int eqArray [3][2];
 		MenuItemImage* eqItem;
+		MenuItemImage* plugItem;
+
+		LabelTTF* eqStatus;
 
 		// there's no 'id' in cpp, so we recommend returning the class instance pointer
 		static cocos2d::Scene* createScene();
@@ -32,10 +36,13 @@ class HelloWorld : public cocos2d::Layer
 
 		void updateData(float dt);
 
-		// a selector callback
+		void upgradeCallback(cocos2d::Ref* pSender);
+
 		void eqCallback(cocos2d::Ref* pSender);
 
 		void plugCallback(cocos2d::Ref* pSender);
+
+		void changeEq(int sEq);
 
 		// a selector callback
 		void menuCloseCallback(cocos2d::Ref* pSender);
