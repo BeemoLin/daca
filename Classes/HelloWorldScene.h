@@ -20,11 +20,15 @@ class HelloWorld : public cocos2d::Layer
 		int score;
 		int eq;
 		int plug;
+		bool pluging;
 		int eqArray [3][2];
 		MenuItemImage* eqItem;
 		MenuItemImage* plugItem;
+		ProgressTimer* progressTimer;
 
 		LabelTTF* eqStatus;
+
+		CCUserDefault* save;
 
 		// there's no 'id' in cpp, so we recommend returning the class instance pointer
 		static cocos2d::Scene* createScene();
@@ -35,6 +39,8 @@ class HelloWorld : public cocos2d::Layer
 		void update(float dt);
 
 		void updateData(float dt);
+
+		void upgradeTimer(float dt);
 
 		void upgradeCallback(cocos2d::Ref* pSender);
 

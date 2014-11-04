@@ -28,17 +28,33 @@ bool HelloWorld::init()
 		return false;
 	}
 
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	save = CCUserDefault::sharedUserDefault();
 
-	score = 0;
+	if(save->getIntegerForKey("score", -1) < 0)
+	{
+	    save->setIntegerForKey("score", 0);
+	    save->flush();
+	}
+
+	score = save->getIntegerForKey("score");
+
 	eq = 0;
+
+        if(save->getIntegerForKey("score", -1) < 0)
+        {
+            save->setIntegerForKey("score", 0);
+            save->flush();
+        }
+
 	eqArray[0][0] = 3;
 	eqArray[0][1] = 0;
 	eqArray[1][0] = 1;
 	eqArray[1][1] = 0;
 	eqArray[2][0] = 2;
 	eqArray[2][1] = 0;
+
+        Size visibleSize = Director::getInstance()->getVisibleSize();
+        Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/////////////////////////////
 	// 2. add a menu item with "X" image, which is clicked to quit the program
@@ -58,12 +74,48 @@ bool HelloWorld::init()
 	//menu->setPosition(Vec2::ZERO);
 	//this->addChild(menu, 1);
 
-	auto imageItem = MenuItemImage::create(
-			"001.png",
-			"002.png",
-			CC_CALLBACK_1(HelloWorld::upgradeCallback, this));
+	/*
+	//创建精灵sprite
+	    Sprite* strike = Sprite::create("strike.png");
+	    strike->setPosition( Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y) );
+	    this->addChild(strike);
 
-	imageItem->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+
+	//创建CCAnimation
+	    //将plist批处理的多张图片，添加到精灵帧缓冲池中
+	    SpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("strike.plist");
+
+	    //创建精灵帧CCSpriteFrame数组
+	    Vector array;
+	    for(int i =1; i <= 2; i++) {
+	        char str[50];
+	        sprintf(str, "strike_%02d.png", i);
+
+	        SpriteFrame* frame = SpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(str);
+	        array.pushBack(frame);
+	    }
+
+	    //使用精灵帧数组创建，单位帧间隔为2.0/14.0秒
+	    Animation* animation = Animation::createWithSpriteFrames(array, 2.0/14.0);
+
+	    //属性设置
+	    animation->setRestoreOriginalFrame(true); //还原第一帧
+	    animation->setLoops(-1);                  //无线循环
+
+
+	//创建CCAnimate
+	    Animate* animate = Animate::create(animation);
+
+
+	//执行动画动作
+	    strike->runAction(animate);
+        */
+	//auto imageItem = MenuItemImage::create(
+	//		"001.png",
+	//		"002.png",
+	//		CC_CALLBACK_1(HelloWorld::upgradeCallback, this));
+
+	//imageItem->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
 
 	eqItem = MenuItemImage::create("eq.png", "eq.png", CC_CALLBACK_1(HelloWorld::eqCallback, this));
 	eqItem->setPosition(Vec2(origin.x + visibleSize.width/2, origin.y + visibleSize.height - eqItem->getContentSize().height));
@@ -74,23 +126,24 @@ bool HelloWorld::init()
 	plugItem->setTag(tagEqItem);
 
 	// create menu, it's an autorelease object
-	auto menu = Menu::create(closeItem, imageItem, eqItem, plugItem, NULL);
+	auto menu = Menu::create(closeItem, eqItem, plugItem, NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 
-	/////////////////////////////
-	// 3. add your codes below...
 
-	// add a label shows "Hello World"
-	// create and initialize a label
-
-	//auto label = LabelTTF::create("分數", "fonts/Marker Felt.ttf", 24);
-
-	// position the label on the center of the screen
-	//label->setPosition(Vec2(label->getContentSize().width,
-	//                        origin.y + visibleSize.height - label->getContentSize().height));
-	// add the label as a child to this layer
-	//this->addChild(label, 1);
+        progressTimer = ProgressTimer::create( CCSprite::create("process.png") );
+        if ( progressTimer != NULL )
+        {
+            progressTimer->setType(kCCProgressTimerTypeBar);
+            progressTimer->setMidpoint(ccp(0, 0));
+            progressTimer->setBarChangeRate(ccp(1, 0));
+            progressTimer->setPercentage(0);
+            progressTimer->setPosition(
+                Vec2(origin.x + visibleSize.width/2,
+                    origin.y +
+                    (progressTimer->getContentSize().height + plugItem->getContentSize().height*1.5)));
+            addChild(progressTimer);
+        }
 
 	CCString* ns=CCString::createWithFormat("%d",score);
 	string score_s=ns->_string;
@@ -136,13 +189,37 @@ void HelloWorld::update(float dt)
 
 void HelloWorld::updateData(float dt)
 {
-	score++;
+    score++;
+    save->setIntegerForKey("score", score);
+    save->flush();
 }
 
 void HelloWorld::upgradeCallback(cocos2d::Ref* pSender)
 {
-    int eqLevel = eqArray[eq][1];
+  score++;
 
+  if(!pluging && score>100)
+  {
+      pluging = true;
+      this->schedule(schedule_selector(HelloWorld::upgradeTimer),0.1,19,0);
+  }
+
+}
+
+void HelloWorld::upgradeTimer(float dt)
+{
+  int eqLevel = eqArray[eq][1];
+
+  int progress = progressTimer->getPercentage();
+
+  progress=progress+5;
+  progressTimer->setPercentage(progress);
+
+  if(progress>99)
+  {
+    progress=0;
+
+    progressTimer->setPercentage(progress);
     if(eqLevel<=6)
     {
         srand((unsigned)time(NULL)); //rand seed
@@ -184,12 +261,19 @@ void HelloWorld::upgradeCallback(cocos2d::Ref* pSender)
         }
     }
 
-
     eqArray[eq][1]= eqLevel;
+
+    //完成才扣除材料
+    score=score-100;
+    // 解除鎖定變更物件
+    pluging=false;
+  }
 }
 
 void HelloWorld::eqCallback(cocos2d::Ref* pSender)
 {
+    if(!pluging)
+      {
 	if(eq<2)
 	{
 		eq++;
@@ -198,18 +282,22 @@ void HelloWorld::eqCallback(cocos2d::Ref* pSender)
 	{
 		eq = 0;
 	}
+      }
 }
 
 void HelloWorld::plugCallback(cocos2d::Ref* pSender)
 {
-  if(plug<1)
-  {
-      plug++;
-  }
-  else
-  {
-      plug = 0;
-  }
+  if(!pluging)
+    {
+      if(plug<1)
+      {
+          plug++;
+      }
+      else
+      {
+          plug = 0;
+      }
+    }
 
   switch(plug)
   {
