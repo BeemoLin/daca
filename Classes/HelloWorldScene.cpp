@@ -74,29 +74,29 @@ bool HelloWorld::init()
 	//menu->setPosition(Vec2::ZERO);
 	//this->addChild(menu, 1);
 
-	/*
+
 	//创建精灵sprite
-	    Sprite* strike = Sprite::create("strike.png");
+	    Sprite* strike = Sprite::create("strike/strike.png");
 	    strike->setPosition( Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y) );
 	    this->addChild(strike);
 
 
 	//创建CCAnimation
 	    //将plist批处理的多张图片，添加到精灵帧缓冲池中
-	    SpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("strike.plist");
+	    SpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("strike/strike.plist");
 
 	    //创建精灵帧CCSpriteFrame数组
-	    Vector array;
+	    Vector<SpriteFrame*> animFrames;
 	    for(int i =1; i <= 2; i++) {
 	        char str[50];
-	        sprintf(str, "strike_%02d.png", i);
+	        sprintf(str, "strike%02d.png", i);
 
 	        SpriteFrame* frame = SpriteFrameCache::sharedSpriteFrameCache()->spriteFrameByName(str);
-	        array.pushBack(frame);
+	        animFrames.pushBack(frame);
 	    }
 
 	    //使用精灵帧数组创建，单位帧间隔为2.0/14.0秒
-	    Animation* animation = Animation::createWithSpriteFrames(array, 2.0/14.0);
+	    Animation* animation = Animation::createWithSpriteFrames(animFrames, 2.0/14.0);
 
 	    //属性设置
 	    animation->setRestoreOriginalFrame(true); //还原第一帧
@@ -109,7 +109,7 @@ bool HelloWorld::init()
 
 	//执行动画动作
 	    strike->runAction(animate);
-        */
+
 	//auto imageItem = MenuItemImage::create(
 	//		"001.png",
 	//		"002.png",
